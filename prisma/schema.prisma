@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  lastName String
+  email    String
+  password String
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean      @default(false)
+  bought    UserDrinks[]
+
+  @@map(name: "users")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
+  drink     Drink[]
+
+  @@map(name: "category")
+}
+
+model Drink {
+  id          String   @id @default(cuid())
+  name        String
+  price       String
+  description String?
+  available   Boolean  @default(true)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  createdBy  String?
+  updatedBy  String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  deleted    Boolean      @default(false)
+  UserDrinks UserDrinks[]
+
+  @@map(name: "drink")
+}
+
+model UserDrinks {
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  drinkId String
+  drink   Drink  @relation(fields: [drinkId], references: [id])
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
+
+  @@id([userId, drinkId])
+  @@map(name: "user_drinks")
+}
